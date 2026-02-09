@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"slices"
 	"sync"
 
 	"pragprog.com/rggo/interactive_tools/pomo/pomodoro"
@@ -20,13 +19,14 @@ func New() *InMemoryRepository {
 	}
 }
 
-func (r *InMemoryRepository) Create(i pomodoro.Interval) (int64, error) {
+func (r *InMemoryRepository) Create(i pomodoro.Interval) int64 {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
+	id := int64(len(r.intervals) + 1)
+	i.Id = id
 	r.intervals = append(r.intervals, i)
-	id := len(r.intervals)
-	return int64(id), nil
+	return id
 }
 
 func (r *InMemoryRepository) Update(i pomodoro.Interval) error {
@@ -73,10 +73,9 @@ func (r *InMemoryRepository) Breaks(n int) ([]pomodoro.Interval, error) {
 	defer r.mu.RUnlock()
 
 	breaks := make([]pomodoro.Interval, 0)
-	slices.Reverse(r.intervals)
-	for _, b := range r.intervals {
-		if b.Category == pomodoro.CategoryLongBreak || b.Category == pomodoro.CategoryShortBreak {
-			breaks = append(breaks, b)
+	for i := len(r.intervals) - 1; i >= 0; i-- {
+		if r.intervals[i].Category == pomodoro.CategoryLongBreak || r.intervals[i].Category == pomodoro.CategoryShortBreak {
+			breaks = append(breaks, r.intervals[i])
 			if len(breaks) == n {
 				return breaks, nil
 			}

@@ -35,7 +35,7 @@ type Interval struct {
 
 // Repository interface
 type Repository interface {
-	Create(i Interval) (int64, error)
+	Create(i Interval) int64
 	Update(i Interval) error
 	GetById(id int64) (Interval, error)
 	Last() (Interval, error)
