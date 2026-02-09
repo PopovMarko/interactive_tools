@@ -35,7 +35,7 @@ type Interval struct {
 
 // Repository interface
 type Repository interface {
-	Create(i Interval) error
+	Create(i Interval) (int64, error)
 	Update(i Interval) error
 	GetById(id int64) (Interval, error)
 	Last() (Interval, error)
@@ -116,7 +116,7 @@ func getNextCategory(cfg *IntervalConfig) (string, error) {
 	}
 	switch last.Category {
 
-	case CategoryShortBreak, CteagoryLongBreak:
+	case CategoryShortBreak, CategoryLongBreak:
 		return CategoryWork, nil
 
 	case CategoryWork:
@@ -131,8 +131,8 @@ func getNextCategory(cfg *IntervalConfig) (string, error) {
 			if b.Category == CategoryLongBreak {
 				return CategoryShortBreak, nil
 			}
-			return CategoryLongBreak, nil
 		}
+		return CategoryLongBreak, nil
 	}
 	return "", ErrInvalidCategory
 }
@@ -168,6 +168,7 @@ func tick(ctx context.Context, id int64, cfg *IntervalConfig, start, periodic, e
 				return err
 			}
 			i.State = StateCompleted
+			end(i)
 			return cfg.repo.Update(i)
 		case <-ctx.Done():
 			i, err = cfg.repo.GetById(id)
@@ -197,7 +198,7 @@ func GetLast(cfg *IntervalConfig) (Interval, error) {
 }
 
 // Start interval method
-func (i *Interval) Start(ctx context.Context, cfg *IntervalConfig, start, periodic, end Callback) error {
+func (i *Interval) Start(ctx context.Context, id int64, cfg *IntervalConfig, start, periodic, end Callback) error {
 	switch i.State {
 	case StateRunning:
 		return nil
@@ -209,7 +210,7 @@ func (i *Interval) Start(ctx context.Context, cfg *IntervalConfig, start, period
 		if err := cfg.repo.Update(*i); err != nil {
 			return err
 		}
-		return tick(ctx, cfg, start, periodic, end)
+		return tick(ctx, id, cfg, start, periodic, end)
 	case StateCancelled, StateCompleted:
 		return ErrIntervalCompleted
 	default:
