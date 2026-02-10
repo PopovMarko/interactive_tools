@@ -1,19 +1,20 @@
-package repository
+package repository_test
 
 import (
 	"testing"
 
 	"pragprog.com/rggo/interactive_tools/pomo/pomodoro"
+	"pragprog.com/rggo/interactive_tools/pomo/pomodoro/repository"
 )
 
-func getData(t *testing.T) (pomodoro.Interval, *InMemoryRepository) {
+func getData(t *testing.T) (pomodoro.Interval, *repository.InMemoryRepository) {
 	t.Helper()
 
 	i := pomodoro.Interval{
 		Category: pomodoro.CategoryWork,
 		State:    pomodoro.StateRunning,
 	}
-	r := New()
+	r := repository.New()
 	return i, r
 }
 
@@ -23,8 +24,8 @@ func TestCreate(t *testing.T) {
 	if id != 1 {
 		t.Errorf("Expected id: 1, got: %d", id)
 	}
-	if len(r.intervals) != 1 {
-		t.Errorf("Expected intervals length: 1, got %d", len(r.intervals))
+	if len(r.Intervals) != 1 {
+		t.Errorf("Expected intervals length: 1, got %d", len(r.Intervals))
 	}
 }
 
