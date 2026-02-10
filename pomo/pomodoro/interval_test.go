@@ -1,6 +1,7 @@
 package pomodoro_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -71,6 +72,46 @@ func TestNewConfig(t *testing.T) {
 			}
 			if cfg.ShortBreakDuration != tc.expected.ShortBreakDuration {
 				t.Errorf("Expected ShortBreakDuration %v, got %v", tc.expected.ShortBreakDuration, cfg.ShortBreakDuration)
+			}
+		})
+	}
+}
+
+func TestNewInterval(t *testing.T) {
+	const duration = 1 * time.Millisecond
+	r, cleanUp := GetRepository(t)
+	defer cleanUp()
+
+	cfg := pomodoro.NewConfig(r, 3*duration, 2*duration, duration)
+
+	for j := 1; j <= 16; j++ {
+		var (
+			expCategory string
+			expDuration time.Duration
+		)
+		switch {
+		case j%2 != 0:
+			expCategory = pomodoro.CategoryWork
+			expDuration = 3 * duration
+		case j%8 == 0:
+			expCategory = pomodoro.CategoryLongBreak
+			expDuration = 2 * duration
+		case j%2 == 0:
+			expCategory = pomodoro.CategoryShortBreak
+			expDuration = duration
+		}
+		name := fmt.Sprintf("%s_%d", expCategory, j)
+		t.Run(name, func(t *testing.T) {
+			res, err := pomodoro.NewInterval(cfg)
+			if err != nil {
+				t.Fatalf("Expect no error. got %v", err)
+			}
+			cfg.Repo.Create(res)
+			if res.Category != expCategory {
+				t.Errorf("Expected category %s, got %s", expCategory, res.Category)
+			}
+			if res.PlannedDuration != expDuration {
+				t.Errorf("Expected planed duration %v, got %v", expDuration, res.PlannedDuration)
 			}
 		})
 	}
