@@ -70,7 +70,7 @@ jobs:
     - name: Build binary
       run: |
         mkdir -p bin
-        go build -o bin/pomodoro ./pomo/pomodoro
+        go build -o bin/pomodoro ./pomodoro
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
