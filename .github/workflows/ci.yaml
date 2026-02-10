@@ -65,7 +65,6 @@ jobs:
         chache-dependency-path: pomo/go.sum
 
     - name: Build
-      working-directory: ./pomo
       run: go build -v ./...
 
     - name: Build binary
