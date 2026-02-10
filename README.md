@@ -1,6 +1,6 @@
 # Interactive Tools - Pomodoro Timer
 
-[![CI](https://github.com/PopovMarko/interactive_tools/workflows/CI/badge.svg)](https://github.com/PopovMarko/interactive_tools/actions/workflows/ci.yml)
+[![CI_pomo](https://github.com/PopovMarko/interactive_tools/workflows/CI_pomo/badge.svg)](https://github.com/PopovMarko/interactive_tools/actions/workflows/ci.yml)
 [![Lint](https://github.com/PopovMarko/interactive_tools/workflows/Lint/badge.svg)](https://github.com/PopovMarko/interactive_tools/actions/workflows/lint.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/PopovMarko/interactive_tools)](https://goreportcard.com/report/github.com/PopovMarko/interactive_tools)
 <!-- [![codecov](https://codecov.io/gh/PopovMarko/interactive_tools/branch/main/graph/badge.svg)](https://codecov.io/gh/PopovMarko/interactive_tools) -->
