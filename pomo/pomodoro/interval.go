@@ -60,7 +60,7 @@ type IntervalConfig struct {
 	ShortBreakDuration time.Duration
 }
 
-// interval configuration constcuctor
+// interval configuration constructor
 func NewConfig(
 	repo Repository,
 	workDuration,
