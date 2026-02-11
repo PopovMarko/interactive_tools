@@ -53,8 +53,6 @@ jobs:
           exit 1
         fi
         echo "✅ Code is properly formatted"
-      working-directory: ./pomo
-
   vet:
     name: Go Vet
     runs-on: ubuntu-latest
@@ -70,4 +68,3 @@ jobs:
 
     - name: Run go vet
       run: go vet ./...
-      working-directory: ./pomo

@@ -1,0 +1,80 @@
+name: CI_pomo
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+
+defaults:
+  run:
+    working-directory: ./pomo
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: ['1.25']
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ matrix.go-version }}
+        cache: true
+        cache-dependency-path: pomo/go.sum
+
+    - name: Download dependencies
+      run: go mod download
+
+    - name: Verify dependencies
+      run: go mod verify
+
+    - name: Run tests
+      run: go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+
+    # - name: Upload coverage to Codecov
+    #   if: matrix.go-version == '1.23'
+    #   uses: codecov/codecov-action@v4
+    #   with:
+    #     file: ./pomo/coverage.out
+    #     flags: unittests
+    #     name: codecov-umbrella
+    #   env:
+    #     CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.25'
+        cache: true
+        cache-dependency-path: pomo/go.sum
+
+    - name: Build
+      run: go build -v ./...
+
+    - name: Build binary
+      run: |
+        mkdir -p bin
+        go build -o bin/pomodoro ./pomodoro
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: pomodoro-binary
+        path: bin/pomodoro
+        retention-days: 7

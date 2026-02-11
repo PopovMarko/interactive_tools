@@ -35,7 +35,7 @@ type Interval struct {
 
 // Repository interface
 type Repository interface {
-	Create(i Interval) error
+	Create(i Interval) int64
 	Update(i Interval) error
 	GetById(id int64) (Interval, error)
 	Last() (Interval, error)
@@ -54,20 +54,20 @@ var (
 
 // Interval configuration
 type IntervalConfig struct {
-	repo               Repository
+	Repo               Repository
 	WorkDuration       time.Duration
 	LongBreakDuration  time.Duration
 	ShortBreakDuration time.Duration
 }
 
-// interval configuration constcuctor
+// interval configuration constructor
 func NewConfig(
 	repo Repository,
 	workDuration,
 	longBreakDuration,
 	ShortBreakDuration time.Duration) *IntervalConfig {
 	c := &IntervalConfig{
-		repo:               repo,
+		Repo:               repo,
 		WorkDuration:       25 * time.Minute,
 		LongBreakDuration:  15 * time.Minute,
 		ShortBreakDuration: 5 * time.Minute,
@@ -88,10 +88,16 @@ func NewConfig(
 func NewInterval(cfg *IntervalConfig) (Interval, error) {
 	i := Interval{}
 	c, err := getNextCategory(cfg)
-	if err != nil {
+	if err == nil {
+		i.Category = c
+	}
+	if err != nil && !errors.Is(err, ErrNoIntervals) {
 		return i, err
 	}
-	i.Category = c
+	if err != nil && errors.Is(err, ErrNoIntervals) {
+		i.Category = CategoryWork
+	}
+
 	switch c {
 	case CategoryWork:
 		i.PlannedDuration = cfg.WorkDuration
@@ -116,11 +122,11 @@ func getNextCategory(cfg *IntervalConfig) (string, error) {
 	}
 	switch last.Category {
 
-	case CategoryShortBreak, CteagoryLongBreak:
+	case CategoryShortBreak, CategoryLongBreak:
 		return CategoryWork, nil
 
 	case CategoryWork:
-		breaks, err := cfg.repo.Breaks(3)
+		breaks, err := cfg.Repo.Breaks(3)
 		if err != nil {
 			return "", err
 		}
@@ -131,8 +137,8 @@ func getNextCategory(cfg *IntervalConfig) (string, error) {
 			if b.Category == CategoryLongBreak {
 				return CategoryShortBreak, nil
 			}
-			return CategoryLongBreak, nil
 		}
+		return CategoryLongBreak, nil
 	}
 	return "", ErrInvalidCategory
 }
@@ -144,7 +150,7 @@ type Callback func(Interval)
 func tick(ctx context.Context, id int64, cfg *IntervalConfig, start, periodic, end Callback) error {
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
-	i, err := cfg.repo.GetById(id)
+	i, err := cfg.Repo.GetById(id)
 	if err != nil {
 		return err
 	}
@@ -153,7 +159,7 @@ func tick(ctx context.Context, id int64, cfg *IntervalConfig, start, periodic, e
 	for {
 		select {
 		case <-ticker.C:
-			i, err = cfg.repo.GetById(id)
+			i, err = cfg.Repo.GetById(id)
 			if err != nil {
 				return err
 			}
@@ -163,19 +169,20 @@ func tick(ctx context.Context, id int64, cfg *IntervalConfig, start, periodic, e
 			i.ActualDuration += time.Second
 			periodic(i)
 		case <-expire:
-			i, err = cfg.repo.GetById(id)
+			i, err = cfg.Repo.GetById(id)
 			if err != nil {
 				return err
 			}
 			i.State = StateCompleted
-			return cfg.repo.Update(i)
+			end(i)
+			return cfg.Repo.Update(i)
 		case <-ctx.Done():
-			i, err = cfg.repo.GetById(id)
+			i, err = cfg.Repo.GetById(id)
 			if err != nil {
 				return err
 			}
 			i.State = StateCancelled
-			return cfg.repo.Update(i)
+			return cfg.Repo.Update(i)
 		}
 	}
 }
@@ -186,18 +193,18 @@ func GetLast(cfg *IntervalConfig) (Interval, error) {
 		i   Interval
 		err error
 	)
-	i, err = cfg.repo.Last()
+	i, err = cfg.Repo.Last()
 	if err != nil && !errors.Is(err, ErrNoIntervals) {
 		return i, err
 	}
 	if err == nil && i.State != StateCompleted && i.State != StateCancelled {
 		return i, nil
 	}
-	return NewInterval(cfg)
+	return i, err
 }
 
 // Start interval method
-func (i *Interval) Start(ctx context.Context, cfg *IntervalConfig, start, periodic, end Callback) error {
+func (i *Interval) Start(ctx context.Context, id int64, cfg *IntervalConfig, start, periodic, end Callback) error {
 	switch i.State {
 	case StateRunning:
 		return nil
@@ -206,10 +213,10 @@ func (i *Interval) Start(ctx context.Context, cfg *IntervalConfig, start, period
 		fallthrough
 	case StatePaused:
 		i.State = StateRunning
-		if err := cfg.repo.Update(*i); err != nil {
+		if err := cfg.Repo.Update(*i); err != nil {
 			return err
 		}
-		return tick(ctx, cfg, start, periodic, end)
+		return tick(ctx, id, cfg, start, periodic, end)
 	case StateCancelled, StateCompleted:
 		return ErrIntervalCompleted
 	default:
@@ -220,6 +227,6 @@ func (i *Interval) Start(ctx context.Context, cfg *IntervalConfig, start, period
 // Pause interval method
 func (i *Interval) Pause(cfg *IntervalConfig) error {
 	i.State = StatePaused
-	return cfg.repo.Update(*i)
+	return cfg.Repo.Update(*i)
 
 }
