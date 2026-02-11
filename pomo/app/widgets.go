@@ -54,17 +54,17 @@ func newWidgets(ctx context.Context, errorCh chan<- error) (*widgets, error) {
 		return nil, err
 	}
 
-	w.disType = newDisType(ctx, w.updateDisType, errorCh)
+	w.disType, err = newDisType(ctx, w.updateDisType, errorCh)
 	if err != nil {
 		return nil, err
 	}
 
-	w.txtInfo = newTxtInfo(ctx, w.updateTxtInfo, errorCh)
+	w.txtInfo, err = newText(ctx, w.updateTxtInfo, errorCh)
 	if err != nil {
 		return nil, err
 	}
 
-	w.txtTimer = newTxtTimer(ctx, w.updateTxtType, errorCh)
+	w.txtTimer, err = newText(ctx, w.updateTxtType, errorCh)
 	if err != nil {
 		return nil, err
 	}
