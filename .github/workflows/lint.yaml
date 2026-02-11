@@ -26,9 +26,9 @@ jobs:
         cache: false
 
     - name: Run golangci-lint
-      uses: golangci/golangci-lint-action@v4
+      uses: golangci/golangci-lint-action@v7
       with:
-        version: v1.64.9
+        version: v2.8.0
         working-directory: pomo
         args: --timeout=5m
 
