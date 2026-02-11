@@ -1,7 +1,7 @@
 # Interactive Tools - Pomodoro Timer
 
-[![CI_pomo](https://github.com/PopovMarko/interactive_tools/workflows/CI_pomo/badge.svg)](https://github.com/PopovMarko/interactive_tools/actions/workflows/ci.yml)
-[![Lint](https://github.com/PopovMarko/interactive_tools/actions/workflows/lint.yml/badge.svg)](https://github.com/PopovMarko/interactive_tools/actions/workflows/lint.yml)
+[![CI_pomo](https://github.com/PopovMarko/interactive_tools/workflows/CI_pomo/badge.svg)](https://github.com/PopovMarko/interactive_tools/actions/workflows/ci.yaml)
+[![Lint](https://github.com/PopovMarko/interactive_tools/workflows/Lint/badge.svg)](https://github.com/PopovMarko/interactive_tools/actions/workflows/lint.yaml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/PopovMarko/interactive_tools)](https://goreportcard.com/report/github.com/PopovMarko/interactive_tools)
 <!-- [![codecov](https://codecov.io/gh/PopovMarko/interactive_tools/branch/main/graph/badge.svg)](https://codecov.io/gh/PopovMarko/interactive_tools) -->
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
