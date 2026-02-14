@@ -82,7 +82,7 @@ func newDonTimer(ctx context.Context, donUpdater <-chan []int, errorCh chan<- er
 		for {
 			select {
 			case d := <-donUpdater:
-				if d[0] <= d[1] {
+				if d[0] >= d[1] {
 					return
 				}
 				errorCh <- don.Absolute(d[0], d[1])

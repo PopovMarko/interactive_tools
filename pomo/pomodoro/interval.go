@@ -65,7 +65,7 @@ func NewConfig(
 	repo Repository,
 	workDuration,
 	longBreakDuration,
-	ShortBreakDuration time.Duration) *IntervalConfig {
+	shortBreakDuration time.Duration) *IntervalConfig {
 	c := &IntervalConfig{
 		Repo:               repo,
 		WorkDuration:       25 * time.Minute,
@@ -78,8 +78,8 @@ func NewConfig(
 	if longBreakDuration > 0 {
 		c.LongBreakDuration = longBreakDuration
 	}
-	if ShortBreakDuration > 0 {
-		c.ShortBreakDuration = ShortBreakDuration
+	if shortBreakDuration > 0 {
+		c.ShortBreakDuration = shortBreakDuration
 	}
 	return c
 }

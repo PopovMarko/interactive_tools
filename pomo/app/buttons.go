@@ -21,9 +21,12 @@ func newButtonSet(
 	errorCh chan<- error) (*buttonSet, error) {
 
 	//Callback to Start interval. Start button action
-	startLinterval := func() {
+	startInterval := func() {
 		i, err := pomodoro.GetLast(cfg)
-		errorCh <- err
+		if err != nil {
+			errorCh <- err
+			return
+		}
 
 		//Callback start to use in tick func
 		start := func(i pomodoro.Interval) {
@@ -35,12 +38,12 @@ func newButtonSet(
 		}
 
 		//Callback end to use in tick func
-		end := func(pomodoro.Interval) {
+		end := func(i pomodoro.Interval) {
 			w.update([]int{}, "", "Nothing running", "", redrawCh)
 		}
 
 		//Callback periodic to use in tick func
-		periodic := func(pomodoro.Interval) {
+		periodic := func(i pomodoro.Interval) {
 			w.update([]int{int(i.ActualDuration), int(i.PlannedDuration)},
 				"", "",
 				fmt.Sprint(i.PlannedDuration-i.ActualDuration),
@@ -59,15 +62,15 @@ func newButtonSet(
 		}
 		if err := i.Pause(cfg); err != nil {
 			if err == pomodoro.ErrIntervalNotRunning {
-				return
+				w.update([]int{}, "", "Paused... Press Start to continue", "", redrawCh)
 			}
-			w.update([]int{}, "", "Paused... Press Start to continue", "", redrawCh)
+			return
 		}
 	}
 
 	//Button Start instance
 	btnStart, err := button.New("(s)tart", func() error {
-		go startLinterval()
+		go startInterval()
 		return nil
 	},
 		button.GlobalKey('s'),
