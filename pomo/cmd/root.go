@@ -75,9 +75,9 @@ func init() {
 	rootCmd.Flags().DurationP("long", "l", 15*time.Minute, "deation of the long break interval")
 	rootCmd.Flags().DurationP("shoar", "s", 5*time.Minute, "duration of the short break interval")
 
-	viper.BindPFlag("work", rootCmd.Flags().Lookup("work"))
-	viper.BindPFlag("long", rootCmd.Flags().Lookup("long"))
-	viper.BindPFlag("short", rootCmd.Flags().Lookup("short"))
+	_ = viper.BindPFlag("work", rootCmd.Flags().Lookup("work"))
+	_ = viper.BindPFlag("long", rootCmd.Flags().Lookup("long"))
+	_ = viper.BindPFlag("short", rootCmd.Flags().Lookup("short"))
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
